@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Simulator Praktikum ERP &mdash; TRPL Politeknik META Industri</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Mobile top tab bar -->
+<div class="railtabs" id="railtabs"></div>
+
+<div class="app">
+  <!-- Desktop / Tablet Sidebar Rail -->
+  <aside class="rail">
+    <div class="brand">
+      <div class="mark"><span class="dot"></span><b>Simulator ERP</b></div>
+      <span>Praktikum PL/4008 &middot; TRPL</span>
+    </div>
+
+    <nav class="navlist" id="navlist"></nav>
+    <div class="railfoot">
+      <div class="shortcut-pill">Pintasan: Tekan <b>1</b> &ndash; <b>5</b> di keyboard</div>
+      <button class="sqlbtn" id="sqlToggleBtn" type="button">⚡ SQL Query Inspector</button>
+      <button class="themebtn" id="themeBtn" type="button">Ganti tema</button>
+    </div>
+  </aside>
+
+  <!-- Main Content Container -->
+  <main id="main">
+
+    <!-- =========================================================
+         PRAKTIKUM 1
+         ========================================================= -->
+    <section class="panel" id="p1" data-title="Praktikum 1" data-sub="Evolusi &amp; integrasi ERP">
+      <div class="phead">
+        <div class="eyebrow">Praktikum 1</div>
+        <h1>Menganalisis Evolusi dan Integrasi ERP</h1>
+        <p>Indikator: konsep dan evolusi sistem ERP. Simulasikan bagaimana satu transaksi pesanan pelanggan mengalir ke stok, produksi, dan keuangan setelah sistem terintegrasi.</p>
+      </div>
+
+      <div class="card">
+        <h3>1&ndash;2. Data proses bisnis sebelum integrasi <span class="tag">aplikasi terpisah</span></h3>
+        <div class="scroll-x">
+          <table class="data" id="p1-master">
+            <thead><tr><th>Departemen</th><th>Sistem saat ini</th><th>Masalah</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="note">Keempat baris di atas belum berbagi satu basis data &mdash; setiap kolom &ldquo;Masalah&rdquo; adalah gejala dari data yang sama disimpan berbeda-beda di tiap aplikasi.</p>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>Arsitektur proses &mdash; sebelum ERP</h3>
+          <div class="flow vert">
+            <div class="fstep"><b>Penjualan</b><small>spreadsheet sendiri</small></div>
+            <div class="fstep"><b>Gudang</b><small>aplikasi stok sendiri</small></div>
+            <div class="fstep"><b>Produksi</b><small>formulir manual</small></div>
+            <div class="fstep"><b>Keuangan</b><small>aplikasi akuntansi sendiri</small></div>
+          </div>
+          <p class="note">Tidak ada panah antar kotak &mdash; artinya tidak ada aliran data otomatis; semua pertukaran data dilakukan manual (dicatat ulang oleh orang).</p>
+        </div>
+        <div class="card">
+          <h3>Arsitektur proses &mdash; setelah ERP</h3>
+          <div class="flow vert">
+            <div class="fstep main"><b>Satu basis data bersama (ERP)</b></div>
+            <div class="farrow">&#8645;</div>
+            <div class="flow" style="justify-content:center">
+              <div class="fstep">Penjualan</div><div class="fstep">Gudang</div><div class="fstep">Produksi</div><div class="fstep">Keuangan</div>
+            </div>
+          </div>
+          <p class="note">Setiap modul membaca dan menulis ke data yang sama &mdash; satu transaksi di satu modul langsung terlihat oleh modul lain.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>3&ndash;4. Data master bersama yang perlu digunakan lintas departemen</h3>
+        <div class="subgrid">
+          <div class="stat"><div class="l">Data Produk</div><div class="v" style="font-size:13px">kode, nama, harga jual</div></div>
+          <div class="stat"><div class="l">Data Pelanggan</div><div class="v" style="font-size:13px">identitas, riwayat order</div></div>
+          <div class="stat"><div class="l">Data Bahan Baku</div><div class="v" style="font-size:13px">stok, satuan, pemasok</div></div>
+          <div class="stat"><div class="l">Bill of Materials</div><div class="v" style="font-size:13px">komposisi produk</div></div>
+          <div class="stat"><div class="l">Chart of Accounts</div><div class="v" style="font-size:13px">akun keuangan</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>5. Simulasi transaksi pesanan pelanggan <span class="tag">interaktif</span></h3>
+        <p class="note" style="margin:0 0 12px">Produk: <b>Komponen Otomotif Tipe A</b> &middot; harga Rp150.000/unit &middot; stok produk jadi: <span id="p1-stockview">120</span> unit &middot; 1 unit produk membutuhkan 3 unit bahan baku (stok bahan baku: <span id="p1-rawview">500</span> unit)</p>
+        <div class="formrow">
+          <div class="field"><label for="p1-cust">Nama pelanggan</label><input id="p1-cust" value="Bengkel Jaya Motor"></div>
+          <div class="field"><label for="p1-qty">Jumlah pesanan (unit)</label><input id="p1-qty" type="number" value="40" min="1"></div>
+          <div class="field"><label for="p1-cond">Kondisi tambahan</label>
+            <select id="p1-cond">
+              <option value="normal">Tidak ada (kondisi normal)</option>
+              <option value="stok">Stok bahan baku ternyata tidak mencukupi</option>
+              <option value="ubah">Pelanggan mengubah jumlah pesanan</option>
+              <option value="bayar">Pembayaran pelanggan belum diterima</option>
+              <option value="telat">Produksi mengalami keterlambatan</option>
+            </select>
+          </div>
+          <button class="btn" id="p1-run">Simulasikan transaksi</button>
+          <button class="btn ghost" id="p1-reset">Reset stok</button>
+        </div>
+        <div class="resultbox" id="p1-result"><span class="hint">Isi form lalu klik &ldquo;Simulasikan transaksi&rdquo; untuk melihat dampaknya terhadap stok, produksi, dan keuangan.</span></div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         PRAKTIKUM 2
+         ========================================================= -->
+    <section class="panel" id="p2" data-title="Praktikum 2" data-sub="Arsitektur teknis ERP">
+      <div class="phead">
+        <div class="eyebrow">Praktikum 2</div>
+        <h1>Merancang dan Menguji Arsitektur Teknis ERP</h1>
+        <p>Indikator: arsitektur teknis ERP untuk 100 pengguna di bagian penjualan, gudang, produksi, pembelian, dan keuangan.</p>
+      </div>
+
+      <div class="card">
+        <h3>1. Arsitektur teknis</h3>
+        <div class="diagram">
+          <div class="drow">
+            <div class="dbox"><b>Pengguna Kantor</b><small>LAN</small></div>
+            <div class="dbox"><b>Pengguna Jarak Jauh</b><small>Internet + VPN</small></div>
+          </div>
+          <div class="darrow">&darr;</div>
+          <div class="dbox"><b>Firewall + Load Balancer</b></div>
+          <div class="darrow">&darr;</div>
+          <div class="dbox hi"><b>Server Aplikasi ERP</b></div>
+          <div class="darrow">&darr;</div>
+          <div class="dbox"><b>Server Database</b></div>
+          <div class="darrow">&darr;</div>
+          <div class="dbox"><b>Sistem Pencadangan (Backup)</b></div>
+        </div>
+        <p class="note">Kotak oranye adalah titik kegagalan tunggal (<em>single point of failure</em>) pada rancangan dasar &mdash; lihat simulasi gangguan di bawah.</p>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>2. Matriks hak akses pengguna</h3>
+          <div class="scroll-x">
+            <table class="data matrix" id="p2-matrix">
+              <thead><tr><th>Modul</th><th>Penjualan</th><th>Gudang</th><th>Produksi</th><th>Pembelian</th><th>Keuangan</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="legend">
+            <span><span class="dotcell" style="background:var(--good)"></span>Baca &amp; Tulis</span>
+            <span><span class="dotcell" style="background:var(--warn)"></span>Baca saja</span>
+            <span><span class="dotcell" style="background:var(--border)"></span>Tidak ada akses</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>3. Pencadangan &amp; pemulihan data</h3>
+          <p class="note" style="margin:0 0 10px">Jalankan backup untuk mencatat snapshot, lalu coba pulihkan salah satunya.</p>
+          <div class="flex">
+            <button class="btn" id="p2-backup">Jalankan backup sekarang</button>
+            <button class="btn ghost" id="p2-clear">Bersihkan riwayat</button>
+          </div>
+          <div class="loglist" id="p2-backuplist" style="margin-top:12px"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>4&ndash;6. Simulasi gangguan sistem</h3>
+        <div class="formrow">
+          <div class="field" style="flex:1;min-width:240px"><label for="p2-sim">Pilih kondisi gangguan</label>
+            <select id="p2-sim">
+              <option value="db">Database tidak dapat diakses</option>
+              <option value="app">Server aplikasi mengalami gangguan</option>
+              <option value="net">Koneksi internet terputus</option>
+              <option value="unauth">Pengguna tidak berwenang membuka menu keuangan</option>
+              <option value="lost">Data transaksi hilang akibat pencadangan gagal</option>
+            </select>
+          </div>
+          <button class="btn" id="p2-simrun">Tampilkan penanganan</button>
+        </div>
+        <div class="resultbox" id="p2-result"><span class="hint">Pilih kondisi gangguan untuk melihat dampak, titik kegagalan, dan tindakan penanganannya.</span></div>
+      </div>
+
+      <div class="card">
+        <h3>Perubahan kondisi: 100 &rarr; 800 pengguna, anggaran hanya naik 15%</h3>
+        <div class="formrow">
+          <div class="field"><label for="p2-users">Jumlah pengguna baru</label><input id="p2-users" type="number" value="800"></div>
+          <div class="field"><label for="p2-budget">Kenaikan anggaran (%)</label><input id="p2-budget" type="number" value="15"></div>
+          <button class="btn" id="p2-scale">Evaluasi kapasitas</button>
+        </div>
+        <div class="resultbox" id="p2-scaleresult"><span class="hint">Sistem akan membandingkan kebutuhan kapasitas terhadap anggaran yang tersedia.</span></div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         PRAKTIKUM 3
+         ========================================================= -->
+    <section class="panel" id="p3" data-title="Praktikum 3" data-sub="Proses bisnis &amp; persetujuan">
+      <div class="phead">
+        <div class="eyebrow">Praktikum 3</div>
+        <h1>Pemetaan Proses Bisnis dan Perancangan Alur Persetujuan</h1>
+        <p>Indikator: pemetaan dan perancangan proses bisnis &mdash; pengadaan bahan praktik laboratorium Politeknik META Industri.</p>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>A. Diagram as-is</h3>
+          <div class="flow vert">
+            <div class="fstep risk">1. Dosen ajukan permintaan</div>
+            <div class="farrow">&darr;</div>
+            <div class="fstep risk">2. Kalab verifikasi (perkiraan)</div>
+            <div class="farrow">&darr;</div>
+            <div class="fstep">3. Gudang cek stok</div>
+            <div class="farrow">&darr;</div>
+            <div class="fstep risk">4. Pembelian pilih pemasok</div>
+            <div class="farrow">&darr;</div>
+            <div class="fstep">5. Pimpinan menyetujui</div>
+            <div class="farrow">&darr;</div>
+            <div class="fstep">6. Gudang terima barang</div>
+            <div class="farrow">&darr;</div>
+            <div class="fstep risk">7. Keuangan proses pembayaran</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>B. Diagram to-be</h3>
+          <div class="flow vert">
+            <div class="fstep">1. Dosen input di ERP</div>
+            <div class="farrow">&darr;</div>
+            <div class="fstep main">2. Sistem cek stok otomatis</div>
+            <div class="farrow">&darr;</div>
+            <div class="fstep">3. Kalab setujui (jika kurang)</div>
+            <div class="farrow">&darr;</div>
+            <div class="fstep">4. PO diterbitkan sistem</div>
+            <div class="farrow">&darr;</div>
+            <div class="fstep">5. Pimpinan setujui jika &gt; ambang</div>
+            <div class="farrow">&darr;</div>
+            <div class="fstep">6. Gudang terima, stok ter-update</div>
+            <div class="farrow">&darr;</div>
+            <div class="fstep">7. Pembayaran otomatis dari PO</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>C. Aturan bisnis</h3>
+        <ul class="rules">
+          <li>Permintaan harus memiliki identitas pengaju yang tercatat di sistem.</li>
+          <li>Permintaan pembelian wajib diperiksa terhadap stok gudang secara otomatis sebelum diteruskan.</li>
+          <li>Pesanan pembelian di atas ambang nominal wajib disetujui pihak berwenang sebelum PO terbit.</li>
+          <li>Pembayaran hanya diproses jika permintaan, PO, dan bukti terima barang saling cocok (tiga dokumen).</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>D. Simulasi kondisi khusus &mdash; nilai pembelian berubah</h3>
+        <p class="note" style="margin:0 0 12px">Ambang persetujuan: &le; Rp5.000.000 Kepala Lab &middot; Rp5.000.001&ndash;Rp20.000.000 Pimpinan &middot; &gt; Rp20.000.000 Direktur</p>
+        <div class="formrow">
+          <div class="field"><label for="p3-old">Nilai PO yang sudah disetujui (Rp)</label><input id="p3-old" type="number" value="4500000"></div>
+          <div class="field"><label for="p3-new">Nilai PO setelah penawaran baru (Rp)</label><input id="p3-new" type="number" value="6200000"></div>
+          <button class="btn" id="p3-check">Cek apakah perlu persetujuan ulang</button>
+        </div>
+        <div class="resultbox" id="p3-result"><span class="hint">Masukkan nilai lama dan nilai baru untuk mengecek apakah jenjang persetujuan berubah.</span></div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         PRAKTIKUM 4
+         ========================================================= -->
+    <section class="panel" id="p4" data-title="Praktikum 4" data-sub="Modul keuangan">
+      <div class="phead">
+        <div class="eyebrow">Praktikum 4</div>
+        <h1>Konfigurasi dan Simulasi Modul Keuangan</h1>
+        <p>Indikator: konfigurasi dan simulasi modul keuangan. Saldo awal kas Rp30.000.000 &mdash; lima transaksi berikut sudah dikonfigurasi dan dicatat otomatis sebagai jurnal.</p>
+      </div>
+
+      <div class="card">
+        <h3>Tahap 1 &mdash; Konfigurasi akun</h3>
+        <div class="scroll-x">
+          <table class="data" id="p4-coa">
+            <thead><tr><th>Kode</th><th>Nama Akun</th><th>Tipe</th><th class="num">Saldo Normal</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Tahap 2 &mdash; Input transaksi</h3>
+        <div class="formrow">
+          <div class="field"><label for="p4-type">Jenis transaksi</label>
+            <select id="p4-type">
+              <option value="buy">Pembelian bahan baku (kredit)</option>
+              <option value="payvendor">Pembayaran utang pemasok</option>
+              <option value="sell">Penjualan produk (kredit)</option>
+              <option value="recv">Penerimaan pembayaran pelanggan</option>
+              <option value="opex">Pembayaran beban operasional (tunai)</option>
+            </select>
+          </div>
+          <div class="field"><label for="p4-amt">Nominal (Rp)</label><input id="p4-amt" type="number" value="1000000"></div>
+          <button class="btn" id="p4-add">Tambah &amp; catat jurnal</button>
+        </div>
+        <p class="hint" style="margin-top:8px">Lima transaksi skenario praktikum sudah dimuat di bawah. Transaksi baru akan ditambahkan ke jurnal yang sama.</p>
+      </div>
+
+      <div class="card">
+        <h3>Tahap 3 &mdash; Jurnal, buku besar &amp; neraca saldo</h3>
+        <div class="tabbar" id="p4-tabs">
+          <button class="tabbtn active" data-t="journal">Jurnal</button>
+          <button class="tabbtn" data-t="ledger">Buku Besar</button>
+          <button class="tabbtn" data-t="trial">Neraca Saldo</button>
+        </div>
+        <div id="p4-journal" class="scroll-x"></div>
+        <div id="p4-ledger" class="scroll-x" style="display:none"></div>
+        <div id="p4-trial" class="scroll-x" style="display:none"></div>
+      </div>
+
+      <div class="card">
+        <h3>Tahap 4 &mdash; Pengujian kesalahan</h3>
+        <p class="note" style="margin:0 0 12px">Simulasikan pembayaran utang pemasok yang tercatat dua kali, lalu perbaiki dengan jurnal pembalik tanpa menghapus jejak audit.</p>
+        <div class="flex">
+          <button class="btn warn" id="p4-dup">Simulasikan duplikasi pembayaran</button>
+          <button class="btn" id="p4-fix" disabled>Buat jurnal koreksi (reversing entry)</button>
+        </div>
+        <div class="resultbox" id="p4-errbox"><span class="hint">Belum ada kesalahan disimulasikan.</span></div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         PRAKTIKUM 5
+         ========================================================= -->
+    <section class="panel" id="p5" data-title="Praktikum 5" data-sub="SCM &amp; pembelian">
+      <div class="phead">
+        <div class="eyebrow">Praktikum 5</div>
+        <h1>Konfigurasi SCM dan Pembelian Berbasis Kebutuhan Material</h1>
+        <p>Indikator: konfigurasi modul SCM dan pembelian. Produk butuh 3 unit Bahan A + 2 unit Bahan B per unit; target penyelesaian produksi 6 hari kerja.</p>
+      </div>
+
+      <div class="card">
+        <h3>Tahap 1 &mdash; Data master &amp; persediaan</h3>
+        <div class="scroll-x">
+          <table class="data" id="p5-master">
+            <thead><tr><th>Komponen</th><th class="num">Stok tersedia</th><th class="num">Pesanan belum diterima</th><th class="num">Waktu pengadaan</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Tahap 2&ndash;3 &mdash; Perhitungan kebutuhan &amp; simulasi pembelian</h3>
+        <div class="formrow">
+          <div class="field"><label for="p5-qty">Rencana produksi (unit)</label><input id="p5-qty" type="number" value="300"></div>
+          <div class="field"><label for="p5-deadline2">Batas waktu produksi (hari kerja)</label><input id="p5-deadline2" type="number" value="6"></div>
+          <div class="field" style="justify-content:center">
+            <label class="checkline"><input type="checkbox" id="p5-usepo" checked> Pesanan belum diterima dapat dipakai untuk kebutuhan ini</label>
+          </div>
+          <button class="btn" id="p5-calc">Hitung kebutuhan bersih</button>
+        </div>
+        <div class="resultbox" id="p5-result"><span class="hint">Sistem akan menghitung kebutuhan bruto, kebutuhan bersih, dan rekomendasi permintaan pembelian untuk Bahan A dan Bahan B.</span></div>
+      </div>
+
+      <div class="card">
+        <h3>Dokumen pengadaan otomatis <span class="tag">PR &rarr; PO &rarr; GR</span></h3>
+        <div class="formrow">
+          <button class="btn" id="p5-autoorder">Order semua kekurangan otomatis</button>
+          <button class="btn" id="p5-recvall">Terima semua PO</button>
+          <label class="checkline"><input type="checkbox" id="p5-autojournal"> Catat utang otomatis ke Keuangan (Praktikum 4)</label>
+        </div>
+        <p class="note" style="margin:8px 0">Harga satuan asumsi: Bahan A Rp10.000, Bahan B Rp15.000 (soal tidak memberi harga).</p>
+        <div class="scroll-x"><table class="data" id="p5-docs"><thead><tr><th>No. PO</th><th>Bahan</th><th class="num">Qty</th><th class="num">Diterima</th><th class="num">Sisa</th><th class="num">Estimasi tiba</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+        <div class="resultbox" id="p5-autoresult"><span class="hint">Klik "Order semua kekurangan otomatis": sistem menghitung kebutuhan bersih, membuat PR, menyetujui, menerbitkan PO, dan menambah pesanan belum diterima.</span></div>
+      </div>
+
+      <div class="card">
+        <h3>Tahap 4 &mdash; Simulasi penerimaan barang</h3>
+        <div class="formrow">
+          <div class="field"><label for="p5-recv-item">Komponen</label>
+            <select id="p5-recv-item"><option value="A">Bahan A</option><option value="B">Bahan B</option></select>
+          </div>
+          <div class="field"><label for="p5-recv-qty">Jumlah diterima</label><input id="p5-recv-qty" type="number" value="100"></div>
+          <button class="btn" id="p5-recv">Catat penerimaan barang</button>
+        </div>
+        <div class="resultbox" id="p5-recvresult"><span class="hint">Penerimaan akan menambah stok tersedia dan mengurangi pesanan belum diterima pada tabel data master di atas.</span></div>
+      </div>
+
+      <div class="card">
+        <h3>Tahap 5 &mdash; Pengujian perubahan kondisi pemasok</h3>
+        <p class="note" style="margin:0 0 12px">Skenario: pemasok Bahan B baru dapat mengirim barang dalam sejumlah hari kerja tertentu, sementara produksi harus selesai dalam 6 hari kerja.</p>
+        <div class="formrow">
+          <div class="field"><label for="p5-leadtime">Waktu kirim pemasok (hari kerja)</label><input id="p5-leadtime" type="number" value="8"></div>
+          <div class="field"><label for="p5-deadline">Batas waktu produksi (hari kerja)</label><input id="p5-deadline" type="number" value="6" readonly title="Otomatis dari Tahap 2"></div>
+          <div class="field"><label for="p5-altlead">Waktu kirim pemasok alternatif (hari kerja)</label><input id="p5-altlead" type="number" value="5"></div>
+          <button class="btn" id="p5-risk">Analisis keputusan pengadaan</button>
+        </div>
+        <div class="resultbox" id="p5-riskresult"><span class="hint">Sistem akan merekomendasikan tindakan berdasarkan perbandingan waktu kirim terhadap tenggat produksi.</span></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- SQL & System Query Inspector Drawer (Collapsible) -->
+<div class="sql-drawer" id="sqlDrawer">
+  <div class="sql-drawer-header">
+    <div class="sql-title">
+      <span class="sql-pulse"></span>
+      <b>SQL &amp; System Query Inspector (TRPL Engine)</b>
+      <span class="tag">PostgreSQL Relational Log</span>
+    </div>
+    <div class="sql-actions">
+      <button class="btn ghost" id="clearSqlBtn" style="padding:4px 10px;font-size:11px;">Bersihkan Log</button>
+      <button class="btn ghost" id="closeSqlBtn" style="padding:4px 10px;font-size:11px;">Tutup &times;</button>
+    </div>
+  </div>
+  <div class="sql-drawer-body" id="sqlDrawerContent">
+    <div class="sql-entry comment">-- Menunggu interaksi transaksi pengguna di modul ERP...</div>
+  </div>
+</div>
+
+<!-- Core Engine Script -->
+<script src="js/app.js"></script>
+</body>
+</html>
